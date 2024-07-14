@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from MagneticField import MagneticField
 
 class GDTS:
 
@@ -9,16 +10,22 @@ class GDTS:
         self.turn_rate = turn_rate
         self.airspeed = airspeed
         self.strength = 10  # Strength at the Transmitters Location
-        self.trans_loc = [25, 30]  # Transmitter Location
+        self.trans_loc = [25, 30 ,2]  # Transmitter Location
+        self.tran_ori = [45 , 45 , 45]
         self.total_path_coordinates_x = []
         self.total_path_coordinates_y = []
         self.Initialization()
 
-    def signalstrength(self, pos):
-        x, y = pos[0], pos[1]
-        expont = -(((x - self.trans_loc[0])**2 / 200) + ((y - self.trans_loc[1])**2 / 200))
-        curr_strength = self.strength * (math.exp(expont))
-        return curr_strength
+    # def signalstrength(self, pos):
+    #     x, y = pos[0], pos[1]
+    #     expont = -(((x - self.trans_loc[0])**2 / 200) + ((y - self.trans_loc[1])**2 / 200))
+    #     curr_strength = self.strength * (math.exp(expont))
+    #     return curr_strength 
+    
+    def magneticField(self,rec_loc , tra_loc , rec_ori , tra_ori ):
+        
+        obj = MagneticField(rec_loc , rec_ori , tra_loc , tra_ori) 
+        return np.linalg.norm(obj.magnetic_field)
 
     def Initialization(self):
         self.strengths = []
@@ -38,7 +45,8 @@ class GDTS:
         self.w = self.turn_rate
         self.uav_pos.append(self.curr_pos)
 
-        self.heading = 45
+        self.heading = 0 
+        self.rec_ori = [0 , 0 , self.heading]
         self.delta = 2
 
         self.IterLoop()
@@ -53,9 +61,11 @@ class GDTS:
 
     def IterLoop(self):
         curr_dist = (self.trans_loc[0] - self.uav_pos[-1][0])**2 + (self.trans_loc[1] - self.uav_pos[-1][1])**2
-        self.strengths.append(self.signalstrength(self.curr_pos))
 
         x, y = self.curr_pos
+
+        self.strengths.append(self.magneticField([x,y,2] , self.trans_loc , self.rec_ori , self.tran_ori))
+
         self.total_path_coordinates_x.append(x)
         self.total_path_coordinates_y.append(y)
 
@@ -84,8 +94,9 @@ class GDTS:
 
             self.total_path_coordinates_x.append(x)
             self.total_path_coordinates_y.append(y)
-
-            self.strengths.append(self.signalstrength([x, y]))
+            
+            self.rec_ori[2] = self.heading 
+            self.strengths.append(self.magneticField([x, y , 2] , self.trans_loc , self.rec_ori , self.tran_ori))
             self.uav_pos.append([x, y])
 
             self.p = np.array([x, y]) - np.array(self.curr_pos)
