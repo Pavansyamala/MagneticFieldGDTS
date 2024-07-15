@@ -2,6 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from MagneticField import MagneticField
+from TransmitterFrame import TransmitterFrameField
 
 class GDTS:
 
@@ -10,7 +11,7 @@ class GDTS:
         self.turn_rate = turn_rate
         self.airspeed = airspeed
         self.strength = 10  # Strength at the Transmitters Location
-        self.trans_loc = [25, 30 ,2]  # Transmitter Location
+        self.trans_loc = np.array([25, 30 ,2])  # Transmitter Location
         self.tran_ori = [45 , 45 , 45]
         self.total_path_coordinates_x = []
         self.total_path_coordinates_y = []
@@ -152,19 +153,31 @@ class GDTS:
         self.plotting_path()
 
     def plotting_path(self):
-        x = np.linspace(self.trans_loc[0] , self.initial_rec_loc[0] , 1000)
-        y = np.linspace(self.trans_loc[1] , self.initial_rec_loc[1] , 1000)
+
+        a = np.linspace(self.trans_loc[0]-30 , self.trans_loc[0]+30 , 100)
+        b = np.linspace(self.trans_loc[0]-30 , self.trans_loc[0]+30 , 100)
+        c = np.full(shape=(100,) , fill_value=self.trans_loc[-1])
+
+        A , B , C = np.meshgrid(a,b,c)
+
+        obj = TransmitterFrameField(pr=[A,B,C],pt=self.trans_loc)
+        Bx , By , _ = obj.B 
+
         plt.figure(figsize=(10, 10))
+
+        plt.streamplot(A[:,:,0], B[:,:,0], Bx[:,:,0] , By[:,:,0])
         plt.scatter(self.total_path_coordinates_x, self.total_path_coordinates_y, c='r', s=2)
-        plt.scatter([self.trans_loc[0]], [self.trans_loc[1]], c='b', s=10)
-        plt.scatter([self.initial_rec_loc[0]], [self.initial_rec_loc[1]], c='b', s=10)
-        plt.plot(x , y , 'g')
+        plt.scatter([self.trans_loc[0]], [self.trans_loc[1]], c='m', s=10)
+        plt.scatter([self.initial_rec_loc[0]], [self.initial_rec_loc[1]], c='m', s=10)
+
         plt.annotate("Rec" , xy = (self.initial_rec_loc[0]-2 , self.initial_rec_loc[1]-2))
         plt.annotate("Tran" , xy = (self.trans_loc[0] , self.trans_loc[1]))
+
         plt.xlabel('X - coordinates ')
         plt.ylabel('Y - coordinates ')
+
         plt.title('Total Path Travelled Using GDTS ')
-        plt.savefig("GDTS_test.png")
+        plt.savefig("GDTS_test1.png")
         plt.show()
 
 if __name__ == '__main__':
