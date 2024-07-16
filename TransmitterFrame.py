@@ -5,16 +5,15 @@ import matplotlib.pyplot as plt
 
 class TransmitterFrameField:
 
-    def __init__(self, pr , pt):
-        self.m = [1,0,0]
-        
-        R = np.subtract(np.transpose(pr), pt).T
-        norm_R = np.sqrt(np.einsum("i...,i...", R, R))
+    def __init__(self, r , r0):
+        m = np.array([1,0,0])
+        # Calculate R and norm_R
+        R = np.subtract(np.transpose(r), r0).T
+        norm_R = np.sqrt(np.einsum("i...,i...", R, R)) 
 
-        # Calculate A (replace x, y, z with appropriate values)
-        x, y, z = pr
-        A = np.array([2*x*2 - y**2 - z*2, 3*x*y, 3*x*z])
+        # Handle the case where the norm_R is zero to avoid division by zero
+        norm_R[norm_R == 0] = np.inf
 
-        # Compute magnetic field B
-        norm_m = np.sqrt(np.einsum("i...,i...", self.m, self.m))
-        self.B = np.array((norm_m / ((4 * np.pi) * norm_R**5)) * A)
+        # Calculate A (the magnetic field vector)
+        m_dot_r = np.einsum("i,i...->...", m, R)
+        self.B = (3 * R * m_dot_r / norm_R**5 - m[:, np.newaxis, np.newaxis, np.newaxis] / norm_R**3) 

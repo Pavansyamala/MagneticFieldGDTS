@@ -34,7 +34,7 @@ class GDTS:
         self.timestep = 0
         self.del_t = 1/6
         self.freq = 6
-        self.threshold_dist = 6
+        self.threshold_dist = 2
         self.uav_pos = []
         x, y = map(float, input("Enter initial X, Y coordinates separated by space of Receiver: ").split())
         self.initial_rec_loc = [x, y]
@@ -154,30 +154,31 @@ class GDTS:
 
     def plotting_path(self):
 
-        a = np.linspace(self.trans_loc[0]-30 , self.trans_loc[0]+30 , 100)
-        b = np.linspace(self.trans_loc[0]-30 , self.trans_loc[0]+30 , 100)
-        c = np.full(shape=(100,) , fill_value=self.trans_loc[-1])
 
+        a = np.linspace(self.trans_loc[0]-50,self.trans_loc[0]+50 , 100)
+        b = np.linspace(self.trans_loc[1]-50,self.trans_loc[1]+50, 100)
+        c = np.full(shape=(50,) , fill_value=self.trans_loc[2])
         A , B , C = np.meshgrid(a,b,c)
 
-        obj = TransmitterFrameField(pr=[A,B,C],pt=self.trans_loc)
+        obj = TransmitterFrameField([A,B,C],self.trans_loc)
         Bx , By , _ = obj.B 
 
         plt.figure(figsize=(10, 10))
 
-        plt.streamplot(A[:,:,0], B[:,:,0], Bx[:,:,0] , By[:,:,0])
-        plt.scatter(self.total_path_coordinates_x, self.total_path_coordinates_y, c='r', s=2)
-        plt.scatter([self.trans_loc[0]], [self.trans_loc[1]], c='m', s=10)
-        plt.scatter([self.initial_rec_loc[0]], [self.initial_rec_loc[1]], c='m', s=10)
+        plt.streamplot(A[:,:,0], B[:,:,0], Bx[:,:,0] , By[:,:,0]) 
 
-        plt.annotate("Rec" , xy = (self.initial_rec_loc[0]-2 , self.initial_rec_loc[1]-2))
-        plt.annotate("Tran" , xy = (self.trans_loc[0] , self.trans_loc[1]))
+        plt.scatter(self.total_path_coordinates_x, self.total_path_coordinates_y, c='r', s=2) 
+
+        plt.scatter([self.trans_loc[0]], [self.trans_loc[1]], c='m', s=100 , label='Transmitter') 
+        plt.scatter([self.initial_rec_loc[0]], [self.initial_rec_loc[1]], c='g', s=100, label='Reciever') 
+
 
         plt.xlabel('X - coordinates ')
         plt.ylabel('Y - coordinates ')
+        plt.legend()
 
         plt.title('Total Path Travelled Using GDTS ')
-        plt.savefig("GDTS_test1.png")
+        plt.savefig("GDTS_test5.png")
         plt.show()
 
 if __name__ == '__main__':
