@@ -7,7 +7,7 @@ from MagneticField import MagneticField
 class GDTS:
 
     def __init__(self, turn_rate):
-        self.turn_radius = 10
+        self.turn_radius = 10 # turn radius
         self.turn_rate = np.degrees(turn_rate)
         self.airspeed = self.turn_radius * turn_rate 
         self.trans_loc = np.array([150, 200 , 0])  # Transmitter Location
